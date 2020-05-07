@@ -1,0 +1,9 @@
+# for unity temp directory
+clientproject/Library/
+clientproject/Temp/
+clientproject/Logs/
+
+*.vs
+*.csproj
+*.vscode
+*sln
