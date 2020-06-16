@@ -13,11 +13,11 @@ namespace GameFrame
         /// <summary>
         /// Lua模块
         /// </summary>
-        public static ModLua ModLua {
+        public static ModuleLua ModLua {
             get { return Ins.lua; }
         }
 
-        private ModLua lua;
+        private ModuleLua lua;
 
 
         void InitModules()

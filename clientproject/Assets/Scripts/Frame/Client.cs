@@ -5,19 +5,17 @@
 // [yfxie]
 //
 
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 namespace GameFrame
 {
     public partial class Client : MonoBehaviour
     {
         public static Client Ins = null;
-        public string DbFileName;
-        public string ConfigFileName;
-        public bool IgnoreUpdate = false;
-        public bool IgnoreScript = false;
 
         public bool Inited { get; protected set; }
-
+        private List<IClientModule> allModules = new List<IClientModule>();
         public static bool IsInited {
             get { return Client.Ins != null && Client.Ins.Inited; }
         }
@@ -30,6 +28,7 @@ namespace GameFrame
             {
                 Ins = this;
                 Inited = false;
+                FindMdule();
             }
             else
             {
@@ -42,6 +41,39 @@ namespace GameFrame
 
         }
 
+        void FindMdule()
+        {
+            allModules.Add(ModuleLua.Instance);
+        }
+
+        //³õÊ¼»¯Ä£¿é
+        IEnumerable InitModuleData()
+        {
+            for (int i = 0; i < allModules.Count; i++)
+            {
+                allModules[i].InitData();
+                yield return null;
+            }
+        }
+
+
+        IEnumerable InitModuleInfo()
+        {
+            for (int i = 0; i < allModules.Count; i++)
+            {
+                allModules[i].InitInfo();
+                yield return null;
+            }
+        }
+
+        IEnumerable InitEnd()
+        {
+            for (int i = 0; i < allModules.Count; i++)
+            {
+                allModules[i].InitEnd();
+                yield return null;
+            }
+        }
 
     }
 }

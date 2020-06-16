@@ -2,7 +2,7 @@
 clientproject/Library/
 clientproject/Temp/
 clientproject/Logs/
-
+clientproject/AssetBundles/
 *.vs
 *.csproj
 *.vscode

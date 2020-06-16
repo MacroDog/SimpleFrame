@@ -1,16 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿
+
 using UnityEngine;
 
-public class FrameDebug
+namespace GameFrame
 {
-    public static void Log(object message)
+    public class FrameDebug
     {
-        Log(message);
-    }
-    public static void LogError(object message)
-    {
-        LogError(message);
-    }
+        public static void Log(object message)
+        {
+            Debug.Log(message);
+        }
+        public static void LogError(object message)
+        {
+            Debug.LogError(message);
+        }
 
+    }
 }
