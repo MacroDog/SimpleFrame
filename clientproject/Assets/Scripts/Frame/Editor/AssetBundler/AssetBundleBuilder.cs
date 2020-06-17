@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -36,10 +37,10 @@ namespace GameFrame
             switch (target)
             {
                 case BuildTarget.StandaloneWindows64:
-                    return GetFullOutPutDir(target) + "Windows.manifest";
+                    return GetFullOutPutDir(target) + "Windows";
                 default:
                     FrameDebug.LogError("Dont Contain target" + target.ToString());
-                    return GetFullOutPutDir(target) + "default.manifest";
+                    return GetFullOutPutDir(target) + "default";
             }
         }
         public static string GetAssetBuildPath(BuildTarget target)
@@ -81,7 +82,7 @@ namespace GameFrame
         {
         }
 
-        string GetTargetName(BuildTarget target)
+        static string GetTargetName(BuildTarget target)
         {
             switch (target)
             {
@@ -97,28 +98,44 @@ namespace GameFrame
 
         static void WriteVersion(BuildTarget target)
         {
+            FrameDebug.Log("Start Write Verison");
             var oripath = GetFullOutPutDir(target);
             var path = GetAssetBuildPath(target);
-
-            var manifest = GetManifestPath(target);
-            var temp = AssetBundle.LoadFromFile(path);
-            if (temp == null)
-            {
-                FrameDebug.LogError("Error Path" + path);
-                return;
-            }
-            var allasset = temp.LoadAsset<AssetBundleManifest>("AssetBundleManifest").GetAllAssetBundles();
+            var manifestPath = GetManifestPath(target);
+            var temps = new List<string>(Directory.GetFiles(oripath));
+            temps.Remove(path);
             var versionpath = oripath + versionName;
-            if (File.Exists(versionpath))
+            if (Directory.Exists(versionpath))
             {
-                File.Delete(versionpath);
+                Directory.Delete(versionpath);
             }
-            var fileInfo = File.CreateText(versionpath);
-            foreach (var item in allasset)
+            var viersionfile = File.CreateText(versionpath);
+            var allfiles = new List<string>(Directory.GetFiles(oripath));
+
+            allfiles.Remove(versionpath);
+            allfiles.Remove(manifestPath);
+            allfiles.Remove(manifestPath + ".manifest");
+            var allmanifest = AssetBundle.LoadFromFile(manifestPath).LoadAsset<AssetBundleManifest>("AssetBundleManifest").GetAllAssetBundles();
+            foreach (var item in allmanifest)
             {
-                fileInfo.WriteLine(item);
+                if (!item.EndsWith(".manifest"))
+                {
+                    var fullitemPath = oripath + item;
+                    var manifest = AssetBundle.LoadFromFile(fullitemPath);
+                    if (manifest != null)
+                    {
+                        var code = manifest.GetHashCode();
+                        allfiles.Remove(fullitemPath);
+                        viersionfile.WriteLine(string.Format("{0}\t{1}\t", item, AssetBundleUtils.GetMD5(fullitemPath)));
+                    }
+                }
             }
-            fileInfo.Close();
+            viersionfile.Close();
+            //删除不属于的ab
+            foreach (var item in allfiles)
+            {
+                File.Delete(item);
+            }
             FrameDebug.Log("Finish");
         }
     }
