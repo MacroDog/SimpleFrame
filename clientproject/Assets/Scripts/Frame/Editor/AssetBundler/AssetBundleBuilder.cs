@@ -116,17 +116,24 @@ namespace GameFrame
             allfiles.Remove(manifestPath);
             allfiles.Remove(manifestPath + ".manifest");
             var allmanifest = AssetBundle.LoadFromFile(manifestPath).LoadAsset<AssetBundleManifest>("AssetBundleManifest").GetAllAssetBundles();
-            foreach (var item in allmanifest)
+            for (int i = 0; i < allmanifest.Length; i++)
             {
-                if (!item.EndsWith(".manifest"))
+                if (!allmanifest[i].EndsWith(".manifest"))
                 {
-                    var fullitemPath = oripath + item;
+                    var fullitemPath = oripath + allmanifest[i];
                     var manifest = AssetBundle.LoadFromFile(fullitemPath);
                     if (manifest != null)
                     {
                         var code = manifest.GetHashCode();
                         allfiles.Remove(fullitemPath);
-                        viersionfile.WriteLine(string.Format("{0}\t{1}\t", item, AssetBundleUtils.GetMD5(fullitemPath)));
+                        if (i == allmanifest.Length - 1)
+                        {
+                            viersionfile.Write(string.Format("{0}\t{1}\t{2}", allmanifest[i], AssetBundleUtils.GetMD5(fullitemPath), AssetBundleUtils.GetSize(fullitemPath)));
+                        }
+                        else
+                        {
+                            viersionfile.WriteLine(string.Format("{0}\t{1}\t{2}", allmanifest[i], AssetBundleUtils.GetMD5(fullitemPath), AssetBundleUtils.GetSize(fullitemPath)));
+                        }
                     }
                 }
             }

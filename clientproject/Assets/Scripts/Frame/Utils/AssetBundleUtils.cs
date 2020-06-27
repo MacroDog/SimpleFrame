@@ -31,5 +31,10 @@ namespace GameFrame
                 return "";
             }
         }
+
+        public static long GetSize(string path){
+             Stream st = new FileStream(path, FileMode.Open, FileAccess.Read);
+             return st.Length;
+        }
     }
 }

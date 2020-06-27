@@ -8,7 +8,10 @@ namespace GameFrame
     public class ModuleLua : Singleton<ModuleLua>, IClientModule
     {
 
-        public TextAsset HotFix;
+        public string HotFix = "Hotfix";
+        public const string luaScriptsFolder = @"/Scripts/Frame/LuaScripts/";
+        private static string luaScriptsFullPath; 
+        public TextAsset fixtext;
 
         private bool hotfixed = false;
 
@@ -22,36 +25,41 @@ namespace GameFrame
                 {
                     luaEnv = new LuaEnv();
                 }
-                if (HotFix != null)
+                if (fixtext != null)
                 {
-                    luaEnv.DoString(HotFix.text);
+                    luaEnv.DoString(fixtext.text);
                 }
                 hotfixed = true;
             }
         }
         void IClientModule.InitData()
         {
+            FrameDebug.Log("Start Init ModuleLua");
+            luaScriptsFullPath = Application.dataPath + luaScriptsFolder;
             DoHotFix();
+            luaEnv.AddLoader(CustomLoader);
+            LoadScript(HotFix);
+            LuaFileWatcher.CreateLuaFileWatcher(luaEnv);
         }
 
         void IClientModule.InitEnd()
         {
-            throw new System.NotImplementedException();
+
         }
 
         void IClientModule.InitInfo()
         {
-            throw new System.NotImplementedException();
+
         }
 
         void IClientModule.ResetData()
         {
-            throw new System.NotImplementedException();
+
         }
 
         void IClientModule.ResetInfo()
         {
-            throw new System.NotImplementedException();
+
         }
         public bool DoFile(string path)
         {
@@ -69,6 +77,25 @@ namespace GameFrame
             }
         }
 
+        public void LoadScript(string name)
+        {
+            SafeDoString(string.Format("require('{0}')", name));
+        }
+
+        private static byte[] CustomLoader(ref string filepath)
+        {
+            string scriptPath = string.Empty;
+            filepath = filepath.Replace(".", "/") + ".lua";
+
+            scriptPath = Path.Combine(luaScriptsFullPath, filepath);
+            if (!File.Exists(scriptPath))
+            {
+                FrameDebug.LogError("Error Lua Script Path" + scriptPath);
+                return null;
+            }
+            File.SetAttributes(scriptPath, FileAttributes.Normal);
+            return File.ReadAllBytes(scriptPath);
+        }
         private static TextAsset ReadLuaFile(string path)
         {
             if (path.StartsWith("/"))
@@ -114,6 +141,22 @@ namespace GameFrame
 #endif
             //是否需要解密？
             return content;
+        }
+
+        public void SafeDoString(string scriptContent)
+        {
+            if (luaEnv != null)
+            {
+                try
+                {
+                    luaEnv.DoString(scriptContent);
+                }
+                catch (System.Exception ex)
+                {
+                    string msg = string.Format("xLua exception : {0}\n {1}", ex.Message, ex.StackTrace);
+                    Debug.LogError(msg, null);
+                }
+            }
         }
     }
 }

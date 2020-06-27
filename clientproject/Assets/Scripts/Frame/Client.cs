@@ -38,7 +38,7 @@ namespace GameFrame
 
         void Start()
         {
-
+            StartCoroutine(InitModuleData());
         }
 
         void FindMdule()
@@ -46,8 +46,8 @@ namespace GameFrame
             allModules.Add(ModuleLua.Instance);
         }
 
-        //³õÊ¼»¯Ä£¿é
-        IEnumerable InitModuleData()
+        //ï¿½ï¿½Ê¼ï¿½ï¿½Ä£ï¿½ï¿½
+        IEnumerator InitModuleData()
         {
             for (int i = 0; i < allModules.Count; i++)
             {
